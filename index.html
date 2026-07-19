@@ -115,6 +115,7 @@
               <div class="visual-stage" id="visualStage">
                 <canvas id="visualCanvas" class="visual-canvas" width="900" height="600" aria-hidden="true"></canvas>
                 <img id="generatedImage" class="generated-image hidden" alt="由诗歌意象生成的教学插画" />
+                <div class="visual-empty" id="visualEmpty" aria-hidden="true"></div>
                 <div class="painterly-layer layer-sky"></div>
                 <div class="painterly-layer layer-mist"></div>
                 <div class="painterly-layer layer-land"></div>
@@ -126,7 +127,7 @@
               </div>
               <label class="field-label" for="visualPrompt">可用于文生图工具的提示词</label>
               <textarea id="visualPrompt" rows="5" readonly></textarea>
-              <p class="image-status" id="imageStatus">未配置图像接口时显示本地意象预览；启动本地服务并配置密钥后可生成高清图。</p>
+              <p class="image-status" id="imageStatus">尚未生成高清图。选择诗歌后可复制提示词，或点击按钮生成模型图片。</p>
               <div class="actions">
                 <button class="primary-action" id="generateImageBtn" type="button">生成高清意象图</button>
                 <button class="secondary-action" id="copyPromptBtn" type="button">复制提示词</button>
@@ -198,7 +199,7 @@
               </div>
               <div>
                 <h3>3. 视觉升华</h3>
-                <p>前端先渲染可变化的水墨意象预览；启动本地服务并配置密钥后，可通过 server.js 调用 OpenAI 图像接口，默认使用 gpt-image-1.5 生成高清教学插画。</p>
+                <p>前端仅展示真实生成图，不再使用几何化本地预览；启动本地服务并配置密钥后，可通过 server.js 调用图像接口，生成高清教学插画。</p>
               </div>
               <div>
                 <h3>4. 教学应用</h3>

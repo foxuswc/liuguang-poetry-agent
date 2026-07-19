@@ -300,10 +300,8 @@ function renderResult(poem, score) {
   $("#quadrantBadge").textContent = getQuadrant(state.energy, state.pleasant);
   $("#matchScore").textContent = `匹配度 ${Math.round(score * 100)}%`;
   $("#visualPrompt").value = buildHighResPrompt(poem);
-  $("#generatedImage").classList.add("hidden");
-  $("#generatedImage").removeAttribute("src");
-  $("#imageStatus").textContent = "已生成教学意象提示词，可点击生成高清意象图。";
-  renderVisual(poem);
+  resetVisualStage();
+  $("#imageStatus").textContent = "已生成教学意象提示词。右侧暂为空白，点击按钮后仅展示真实模型图片。";
 }
 
 function buildReason(poem) {
@@ -326,6 +324,18 @@ function renderVisual(poem) {
   stage.querySelector(".mountain-front").style.background = `${a}aa`;
   stage.querySelector(".river").style.backgroundColor = `${c}55`;
   stage.querySelector(".figure").style.opacity = state.pleasant < -0.55 ? "0.9" : "0.68";
+}
+
+function resetVisualStage() {
+  const stage = $("#visualStage");
+  stage.classList.remove("canvas-ready", "image-ready");
+  stage.style.background = "";
+  $("#generatedImage").classList.add("hidden");
+  $("#generatedImage").removeAttribute("src");
+  $("#visualEmpty").classList.remove("hidden");
+  const canvas = $("#visualCanvas");
+  const context = canvas.getContext("2d");
+  context?.clearRect(0, 0, canvas.width, canvas.height);
 }
 
 function hexToRgb(hex) {
@@ -838,7 +848,7 @@ async function generateImage() {
     const result = await response.json();
     if (!response.ok) {
       const message = result.code === "billing_limit_reached"
-        ? `${result.error} 现在右侧看到的是本地预览，不是模型输出。`
+        ? `${result.error} 右侧不会显示本地预览。`
         : result.error || "图像生成失败";
       throw new Error(message);
     }
@@ -848,12 +858,13 @@ async function generateImage() {
     }
     $("#generatedImage").src = imageSource;
     $("#generatedImage").classList.remove("hidden");
+    $("#visualStage").classList.add("image-ready");
     const route = result.route ? `，通道：${result.route}` : "";
     const note = result.note ? ` ${result.note}` : "";
     status.textContent = `已生成高清意象图：${result.model || "image model"}${route}。${note}`;
   } catch (error) {
     const message = String(error.message || "图像生成失败").replace(/[。.\s]+$/, "");
-    const suffix = /当前可使用|当前保留/.test(message) ? "。" : "。当前保留本地意象预览和提示词。";
+    const suffix = /当前可使用|当前保留|当前仅保留|右侧不显示/.test(message) ? "。" : "。当前保留提示词，右侧不显示本地预览。";
     status.textContent = `暂未生成高清图：${message}${suffix}`;
   } finally {
     button.disabled = false;
@@ -969,9 +980,8 @@ function resetForm() {
   $("#resultCard").classList.add("hidden");
   $("#alternatives").innerHTML = "";
   $("#visualPrompt").value = "";
-  $("#generatedImage").classList.add("hidden");
-  $("#generatedImage").removeAttribute("src");
-  $("#imageStatus").textContent = "未配置图像接口时显示本地意象预览；启动本地服务并配置密钥后可生成高清图。";
+  resetVisualStage();
+  $("#imageStatus").textContent = "尚未生成高清图。选择诗歌后可复制提示词，或点击按钮生成模型图片。";
   state.activePoem = null;
 }
 
@@ -1014,6 +1024,7 @@ bindEvents();
 updateEmotionControls(state.energy, state.pleasant);
 renderLibrary();
 renderHistory();
+resetVisualStage();
 
 const params = new URLSearchParams(window.location.search);
 if (params.get("demo") === "anxiety") {

@@ -108,7 +108,7 @@ function normalizeOpenAIImageError(error, status) {
   }
   if (status === 429 || lower.includes("rate limit")) {
     return {
-      error: "图像接口暂时限流，请稍后重试，当前保留本地意象预览。",
+      error: "图像接口暂时限流，请稍后重试。当前仅保留提示词，右侧不显示本地预览。",
       code: "rate_limited",
     };
   }
@@ -297,7 +297,7 @@ async function handleImageGeneration(req, res) {
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) {
     sendJson(res, 400, {
-      error: "未检测到 OPENAI_API_KEY，当前可使用本地意象预览和提示词。",
+      error: "未检测到 OPENAI_API_KEY，当前可继续使用诗歌推荐与提示词，右侧不显示本地预览。",
     });
     return;
   }
@@ -370,7 +370,7 @@ server.listen(port, "127.0.0.1", async () => {
   const readme = await readFile(join(root, "README.md"), "utf8").catch(() => "");
   console.log(`流光诗境智能体已启动：http://127.0.0.1:${port}/`);
   if (!process.env.OPENAI_API_KEY) {
-    console.log("未检测到 OPENAI_API_KEY：高清生图按钮会保留本地预览并提示配置状态。");
+    console.log("未检测到 OPENAI_API_KEY：高清生图按钮会提示配置状态，右侧不显示本地预览。");
   } else {
     console.log("已检测到 OPENAI_API_KEY：高清生图将通过本地代理请求 OpenAI 图像接口。");
   }

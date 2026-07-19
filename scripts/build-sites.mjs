@@ -85,7 +85,7 @@ function normalizeOpenAIImageError(error, status) {
   }
   if (status === 429 || lower.includes("rate limit")) {
     return {
-      error: "图像接口暂时限流，请稍后重试，当前保留本地意象预览。",
+      error: "图像接口暂时限流，请稍后重试。当前仅保留提示词，右侧不显示本地预览。",
       code: "rate_limited",
     };
   }
@@ -262,7 +262,7 @@ async function handleImageGeneration(request, env) {
   if (!getEnv(env, "OPENAI_API_KEY")) {
     return sendJson(
       {
-        error: "未检测到 OPENAI_API_KEY，当前可使用本地意象预览和提示词。",
+        error: "未检测到 OPENAI_API_KEY，当前可继续使用诗歌推荐与提示词，右侧不显示本地预览。",
       },
       400,
     );
