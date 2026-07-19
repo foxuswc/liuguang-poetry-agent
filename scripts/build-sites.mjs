@@ -321,7 +321,7 @@ function serveStatic(request) {
   return new Response(asset.body, {
     headers: {
       "Content-Type": asset.contentType,
-      "Cache-Control": pathname === "/index.html" ? "no-cache" : "public, max-age=300",
+      "Cache-Control": "no-cache",
     },
   });
 }
