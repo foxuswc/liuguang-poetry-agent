@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>流光诗境｜情感驱动型诗歌教学智能体</title>
+    <link rel="icon" href="data:," />
+    <meta
+      name="description"
+      content="基于二维情绪坐标和诗歌资源库的本地可演示智能体，用于中小学诗歌学习、情绪表达与审美共鸣。"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div>
+          <p class="kicker">ECNUFOE2026AI004 项目成果</p>
+          <h1>流光诗境</h1>
+          <p class="subtitle">基于大语言模型思路的情感驱动型诗歌教学智能体本地演示版</p>
+        </div>
+        <nav class="tabs" aria-label="视图切换">
+          <button class="tab-button active" type="button" data-view="student">学生交互</button>
+          <button class="tab-button" type="button" data-view="library">资源库</button>
+          <button class="tab-button" type="button" data-view="method">技术说明</button>
+        </nav>
+      </header>
+
+      <main>
+        <section class="view active" id="view-student" aria-labelledby="student-title">
+          <div class="workspace-grid">
+            <section class="panel input-panel" aria-labelledby="student-title">
+              <div class="panel-heading">
+                <p class="kicker">Step 1</p>
+                <h2 id="student-title">输入当下心境</h2>
+              </div>
+              <label class="field-label" for="emotionText">学生可以直接写一句现在的感受</label>
+              <textarea
+                id="emotionText"
+                rows="5"
+                placeholder="例如：最近考试压力很大，有点焦虑，也不知道自己接下来该往哪里走。"
+              ></textarea>
+
+              <div class="quick-examples" aria-label="示例输入">
+                <button type="button" data-example="最近考试压力很大，有点焦虑，也不知道自己接下来该往哪里走。">焦虑迷茫</button>
+                <button type="button" data-example="我今天很疲惫，只想安静下来，不想再被催着往前跑。">疲惫安静</button>
+                <button type="button" data-example="我有点孤独，像晚上一个人站在楼上，心里说不出来的难受。">孤独低落</button>
+                <button type="button" data-example="我想给自己一点力量，哪怕现在很黑，也想继续找光。">寻找力量</button>
+              </div>
+
+              <div class="slider-grid">
+                <label>
+                  <span>能量值 Arousal</span>
+                  <output id="energyValue">0.20</output>
+                  <input id="energy" type="range" min="-1" max="1" step="0.01" value="0.2" />
+                </label>
+                <label>
+                  <span>愉悦度 Valence</span>
+                  <output id="pleasantValue">0.00</output>
+                  <input id="pleasant" type="range" min="-1" max="1" step="0.01" value="0" />
+                </label>
+              </div>
+
+              <div class="emotion-plane" id="emotionPlane" role="application" aria-label="二维情绪坐标">
+                <div class="axis x-axis">愉悦度</div>
+                <div class="axis y-axis">能量值</div>
+                <button class="emotion-dot" id="emotionDot" type="button" aria-label="当前情绪坐标"></button>
+                <span class="quad quad-1">高能量 / 高愉悦</span>
+                <span class="quad quad-2">高能量 / 低愉悦</span>
+                <span class="quad quad-3">低能量 / 低愉悦</span>
+                <span class="quad quad-4">低能量 / 高愉悦</span>
+              </div>
+
+              <div class="actions">
+                <button class="primary-action" id="analyzeBtn" type="button">生成诗歌引导</button>
+                <button class="secondary-action" id="resetBtn" type="button">清空</button>
+              </div>
+            </section>
+
+            <section class="panel result-panel" aria-live="polite">
+              <div class="panel-heading">
+                <p class="kicker">Step 2</p>
+                <h2>诗境推荐</h2>
+              </div>
+
+              <div id="emptyState" class="empty-state">
+                <div class="empty-mark">光</div>
+                <p>输入一段心情，或在二维坐标中选择情绪位置，系统会匹配一首诗与一段审美引导。</p>
+              </div>
+
+              <article id="resultCard" class="result-card hidden">
+                <div class="match-meta">
+                  <span id="quadrantBadge">情绪象限</span>
+                  <span id="matchScore">匹配度</span>
+                </div>
+                <h3 id="poemTitle"></h3>
+                <p id="poemAuthor" class="poem-author"></p>
+                <blockquote id="poemContent"></blockquote>
+                <div class="guide-box">
+                  <h4>共情引导</h4>
+                  <p id="guideText"></p>
+                </div>
+                <div class="why-box">
+                  <h4>为什么推荐这首诗</h4>
+                  <p id="reasonText"></p>
+                </div>
+              </article>
+            </section>
+
+            <section class="panel visual-panel" aria-labelledby="visual-title">
+              <div class="panel-heading">
+                <p class="kicker">Step 3</p>
+                <h2 id="visual-title">视觉意象</h2>
+              </div>
+              <div class="visual-stage" id="visualStage">
+                <canvas id="visualCanvas" class="visual-canvas" width="900" height="600" aria-hidden="true"></canvas>
+                <img id="generatedImage" class="generated-image hidden" alt="由诗歌意象生成的教学插画" />
+                <div class="painterly-layer layer-sky"></div>
+                <div class="painterly-layer layer-mist"></div>
+                <div class="painterly-layer layer-land"></div>
+                <div class="sun"></div>
+                <div class="mountain mountain-back"></div>
+                <div class="mountain mountain-front"></div>
+                <div class="river"></div>
+                <div class="figure"></div>
+              </div>
+              <label class="field-label" for="visualPrompt">可用于文生图工具的提示词</label>
+              <textarea id="visualPrompt" rows="5" readonly></textarea>
+              <p class="image-status" id="imageStatus">未配置图像接口时显示本地意象预览；启动本地服务并配置密钥后可生成高清图。</p>
+              <div class="actions">
+                <button class="primary-action" id="generateImageBtn" type="button">生成高清意象图</button>
+                <button class="secondary-action" id="copyPromptBtn" type="button">复制提示词</button>
+                <button class="secondary-action" id="saveCaseBtn" type="button">保存本次案例</button>
+              </div>
+            </section>
+
+            <section class="panel alternatives-panel" aria-labelledby="alternatives-title">
+              <div class="panel-heading">
+                <p class="kicker">候选</p>
+                <h2 id="alternatives-title">相近诗境</h2>
+              </div>
+              <div id="alternatives" class="alternatives"></div>
+            </section>
+          </div>
+        </section>
+
+        <section class="view" id="view-library" aria-labelledby="library-title">
+          <div class="library-layout">
+            <section class="panel">
+              <div class="panel-heading">
+                <p class="kicker">Resource</p>
+                <h2 id="library-title">情绪—文学—视觉数据库</h2>
+              </div>
+              <div class="toolbar">
+                <input id="librarySearch" type="search" placeholder="搜索诗名、作者、情绪标签" />
+                <button class="secondary-action" id="exportJsonBtn" type="button">导出 JSON</button>
+              </div>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>诗名</th>
+                      <th>作者</th>
+                      <th>能量</th>
+                      <th>愉悦</th>
+                      <th>情绪标签</th>
+                    </tr>
+                  </thead>
+                  <tbody id="libraryRows"></tbody>
+                </table>
+              </div>
+            </section>
+            <aside class="panel">
+              <div class="panel-heading">
+                <p class="kicker">History</p>
+                <h2>本地案例记录</h2>
+              </div>
+              <div id="historyList" class="history-list"></div>
+              <button class="secondary-action full-width" id="clearHistoryBtn" type="button">清除记录</button>
+            </aside>
+          </div>
+        </section>
+
+        <section class="view" id="view-method" aria-labelledby="method-title">
+          <section class="panel method-panel">
+            <div class="panel-heading">
+              <p class="kicker">Method</p>
+              <h2 id="method-title">技术路线与可结项说明</h2>
+            </div>
+            <div class="method-grid">
+              <div>
+                <h3>1. 情绪感知</h3>
+                <p>系统使用关键词识别与二维情绪坐标共同判断学生状态。坐标沿用罗素情绪环模型：能量值表示唤醒度，愉悦度表示情绪效价。</p>
+              </div>
+              <div>
+                <h3>2. 文学匹配</h3>
+                <p>每首诗拥有情绪标签、能量值、愉悦度、疗愈推荐语和视觉意象。系统综合坐标距离与标签命中，给出最贴近的诗歌。</p>
+              </div>
+              <div>
+                <h3>3. 视觉升华</h3>
+                <p>前端先渲染可变化的水墨意象预览；启动本地服务并配置密钥后，可通过 server.js 调用 OpenAI 图像接口，默认使用 gpt-image-1.5 生成高清教学插画。</p>
+              </div>
+              <div>
+                <h3>4. 教学应用</h3>
+                <p>教师可把推荐结果用于诗歌导入、情绪表达、读写结合和美育讨论；学生可保存案例，形成个人诗歌情绪档案。</p>
+              </div>
+            </div>
+          </section>
+        </section>
+      </main>
+    </div>
+    <script src="./data/poems.js"></script>
+    <script src="./app.js"></script>
+  </body>
+</html>
